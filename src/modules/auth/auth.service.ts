@@ -8,6 +8,7 @@ import {
 } from './auth.types'
 import { CONFLICT, NOT_FOUND } from '../../services/shared/http'
 import bcrypt from 'bcrypt'
+import { generateToken } from '../../services/shared/token'
 
 export async function registerService(
 	data: RegisterInput,
@@ -64,10 +65,14 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 	}
 
 	// generate tokens
+	const accessToken = await generateToken({
+		id: user.id,
+		email: user.email,
+		role: user.role,
+	})
 
 	return {
 		message: 'User Login Successfully',
-		accessToken: 'hdwjcueiieowk',
-		refreshToken: 'djinskcwdicuwieu',
+		accessToken,
 	}
 }
