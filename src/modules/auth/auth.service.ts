@@ -1,7 +1,12 @@
 import AppError from '../../services/shared/appError'
 import prisma from '../../config/db'
-import { RegisterInput, RegisterResponse } from './auth.types'
-import { CONFLICT } from '../../services/shared/http'
+import {
+	LoginInput,
+	LoginResponse,
+	RegisterInput,
+	RegisterResponse,
+} from './auth.types'
+import { CONFLICT, NOT_FOUND } from '../../services/shared/http'
 import bcrypt from 'bcrypt'
 
 export async function registerService(
@@ -34,4 +39,35 @@ export async function registerService(
 	})
 
 	return { message: 'Registration Successful' }
+}
+
+export async function loginService(data: LoginInput): Promise<LoginResponse> {
+	const normalizedEmail = data.email.trim().toLowerCase()
+
+	const user = await prisma.user.findUnique({
+		where: { email: normalizedEmail },
+		select: {
+			id: true,
+			email: true,
+			password: true,
+			role: true,
+		},
+	})
+
+	if (!user) {
+		throw new AppError('Invalid credentials', NOT_FOUND)
+	}
+
+	const comparePassword = await bcrypt.compare(data.password, user.password)
+	if (!comparePassword) {
+		throw new AppError('Invalid credentials', NOT_FOUND)
+	}
+
+	// generate tokens
+
+	return {
+		message: 'User Login Successfully',
+		accessToken: 'hdwjcueiieowk',
+		refreshToken: 'djinskcwdicuwieu',
+	}
 }

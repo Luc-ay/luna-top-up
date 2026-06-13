@@ -23,10 +23,22 @@ export const RegisterSchema = z.object({
 		.min(3, 'Last name must be at least 3 characters long'),
 })
 
+export const LoginSchema = z.object({
+	email: z.email('Email is required'),
+	password: z.string('Password is required'),
+})
+
 export type RegisterInput = z.infer<typeof RegisterSchema>
+export type LoginInput = z.infer<typeof LoginSchema>
 
 // Registration response type
 
 export type RegisterResponse = {
 	message: string
+}
+
+export type LoginResponse = {
+	message: string
+	accessToken: string
+	refreshToken: string
 }
