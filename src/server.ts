@@ -1,6 +1,7 @@
 import app from './app'
 import 'dotenv/config'
 import { PORT } from './config/env'
+import './services/shared/workers'
 
 const port = Number(PORT)
 

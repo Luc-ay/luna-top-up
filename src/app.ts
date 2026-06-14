@@ -11,12 +11,16 @@ dotenv.config()
 const app = express()
 
 // Middleware
-app.use(cors())
 app.use(morgan('dev'))
+app.use(cors())
 app.use(helmet())
 app.use(express.json())
 
 // Routes
+app.get('/ping', (req, res) => {
+	console.log('HELLO! I received a request!')
+	res.send('Pong')
+})
 app.use('/api/auth', authRouter)
 // Error Handler
 

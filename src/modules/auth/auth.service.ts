@@ -9,11 +9,15 @@ import {
 import { CONFLICT, NOT_FOUND } from '../../services/shared/http'
 import bcrypt from 'bcrypt'
 import { generateToken } from '../../services/shared/token'
+import { dispatchEmailJob } from '../../services/shared/queues'
 
 export async function registerService(
 	data: RegisterInput,
 ): Promise<RegisterResponse> {
 	const normalizedEmail = data.email.trim().toLowerCase()
+	const normalizedDisplayName = data.displayName.trim().toLowerCase()
+
+	console.log('Checking this thing here')
 
 	const checkUser = await prisma.user.findUnique({
 		where: { email: normalizedEmail },
@@ -35,9 +39,12 @@ export async function registerService(
 			password: hashPassword,
 			firstName: data.firstName,
 			lastName: data.lastName,
-			displayName: data.displayName,
+			displayName: normalizedDisplayName,
 		},
 	})
+
+	console.log('Sending Worker que')
+	dispatchEmailJob(normalizedEmail, `${data.firstName} ${data.lastName}`)
 
 	return { message: 'Registration Successful' }
 }
@@ -52,6 +59,7 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 			email: true,
 			password: true,
 			role: true,
+			firstName: true,
 		},
 	})
 
