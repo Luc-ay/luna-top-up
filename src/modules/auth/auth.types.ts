@@ -28,8 +28,22 @@ export const LoginSchema = z.object({
 	password: z.string('Password is required'),
 })
 
+export const PasswordSchema = z.object({
+	email: z.email('Email is required'),
+})
+
+export const VerifyOtpSchema = z.object({
+	code: z
+		.string('OTP code us required')
+		.min(6, 'Invalid code')
+		.max(6, 'Invalid code'),
+	email: z.email('Email is required').trim().toLowerCase(),
+})
+
 export type RegisterInput = z.infer<typeof RegisterSchema>
 export type LoginInput = z.infer<typeof LoginSchema>
+export type PasswordInput = z.infer<typeof PasswordSchema>
+export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>
 
 // Registration response type
 
@@ -37,7 +51,12 @@ export type RegisterResponse = {
 	message: string
 }
 
+export type PasswordResponse = {
+	message: string
+}
+
 export type LoginResponse = {
 	message: string
 	accessToken: string
+	user: {}
 }
