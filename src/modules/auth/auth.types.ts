@@ -3,14 +3,11 @@ import z from 'zod'
 export const RegisterSchema = z.object({
 	email: z.email('Email is required'),
 	password: z
-		.string({ message: 'Password must be at least 8 characters long' })
-		.min(8)
+		.string('Password is required')
+		.min(8, 'Password must be at least 8 characters long')
 		.regex(
-			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-			{
-				message:
-					'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-			},
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+			'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
 		),
 	displayName: z
 		.string('Display name is required')
@@ -40,10 +37,22 @@ export const VerifyOtpSchema = z.object({
 	email: z.email('Email is required').trim().toLowerCase(),
 })
 
+export const ChangePasswordSchema = z.object({
+	email: z.email().optional(),
+	newPassword: z
+		.string('Password is required')
+		.min(8, 'Password must be at least 8 characters long')
+		.regex(
+			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/,
+			'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+		),
+})
+
 export type RegisterInput = z.infer<typeof RegisterSchema>
 export type LoginInput = z.infer<typeof LoginSchema>
 export type PasswordInput = z.infer<typeof PasswordSchema>
 export type VerifyOtpInput = z.infer<typeof VerifyOtpSchema>
+export type ChangePasswordInput = z.infer<typeof ChangePasswordSchema>
 
 // Registration response type
 

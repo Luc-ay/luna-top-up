@@ -28,3 +28,8 @@ export function OtpToken(payload: OtpToken): string {
 
 	return passwordToken
 }
+
+export function verifyToken(payload: string) {
+	const decodedToken = jwt.verify(payload, ACCESS_TOKEN_SECRET)
+	return decodedToken
+}

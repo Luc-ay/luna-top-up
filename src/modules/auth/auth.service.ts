@@ -1,6 +1,7 @@
 import AppError from '../../services/shared/appError'
 import prisma from '../../config/db'
 import {
+	ChangePasswordInput,
 	LoginInput,
 	LoginResponse,
 	PasswordInput,
@@ -100,9 +101,13 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 	})
 
 	console.log('Check redis and deleted for active token')
-	await redisConnection.del(`access:${user.id}`)
+	await redisConnection.del(`access_token:${user.id}`)
 	console.log('Save active token to redis')
-	await redisConnection.setex(`access:${user.id},`, 86400, accessToken)
+	await redisConnection.setex(
+		`access_token:${user.id},`,
+		86400,
+		accessToken,
+	)
 
 	return {
 		message: 'User Login Successfully',
@@ -149,9 +154,28 @@ export async function verifyOtpService(data: VerifyOtpInput) {
 
 	const token = await OtpToken({ email: data.email, code: data.code })
 
-	await redisConnection.del(`otp:${data.email}`)
+	await redisConnection.setex(`password_token:${data.email}`, 600, token)
+	redisConnection.del(`otp:${data.email}`)
 
 	return { message: 'Verification Successful', token }
 }
 
-export async function changePasswordService(data: any) {}
+export async function changePasswordService(data: ChangePasswordInput) {
+	const user = await prisma.user.findUnique({
+		where: { email: data.email },
+		select: { id: true },
+	})
+
+	if (!user) {
+		throw new AppError('User account not found', NOT_FOUND)
+	}
+
+	const hashPassword = await bcrypt.hash(data.newPassword, 10)
+
+	await prisma.user.update({
+		where: { id: user.id },
+		data: { password: hashPassword },
+	})
+
+	return 'Password successfully updated'
+}

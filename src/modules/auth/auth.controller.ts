@@ -2,12 +2,14 @@ import { Request, Response } from 'express'
 import AppError from '../../services/shared/appError'
 import asyncHandler from '../../services/shared/catchError'
 import {
+	ChangePasswordSchema,
 	LoginSchema,
 	PasswordSchema,
 	RegisterSchema,
 	VerifyOtpSchema,
 } from './auth.types'
 import {
+	changePasswordService,
 	forgetPasswordService,
 	loginService,
 	registerService,
@@ -38,6 +40,17 @@ export const forgetPasswordController = asyncHandler(async (req, res) => {
 export const verifyOtpController = asyncHandler(async (req, res) => {
 	const data = VerifyOtpSchema.parse(req.body)
 	const result = await verifyOtpService(data)
+
+	return res.status(OK).json(result)
+})
+
+export const changePasswordController = asyncHandler(async (req, res) => {
+	const email = req.user!.email
+	const data = ChangePasswordSchema.parse(req.body)
+	const result = await changePasswordService({
+		newPassword: data.newPassword,
+		email: email,
+	})
 
 	return res.status(OK).json(result)
 })
