@@ -72,7 +72,6 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 			email: true,
 			password: true,
 			role: true,
-			firstName: true,
 			accounts: {
 				select: {
 					id: true,
@@ -112,7 +111,6 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 	return {
 		message: 'User Login Successfully',
 		accessToken,
-		user,
 	}
 }
 

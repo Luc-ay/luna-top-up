@@ -67,5 +67,4 @@ export type PasswordResponse = {
 export type LoginResponse = {
 	message: string
 	accessToken: string
-	user: {}
 }
