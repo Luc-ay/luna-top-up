@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import helmet from 'helmet'
 import errorHandler from './services/middleware/errorHandler'
 import authRouter from './modules/auth/auth.route'
+import userRouter from './modules/userProfile/user.route'
 
 dotenv.config()
 
@@ -22,6 +23,8 @@ app.get('/ping', (req, res) => {
 	res.send('Pong')
 })
 app.use('/api/auth', authRouter)
+app.use('/api/user', userRouter)
+
 // Error Handler
 
 app.use(errorHandler)

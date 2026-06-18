@@ -42,6 +42,7 @@ model User {
   role           Role     @default(USER)
   transactionPin String?
   tier           Tier     @default(Tier1)
+  phone          String?  @unique
   bvnMasked      String?
   ninMasked      String?
   createdAt      DateTime @default(now())
