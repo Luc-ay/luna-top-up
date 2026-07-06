@@ -7,8 +7,11 @@ import {
 	verifyOtpController,
 } from './auth.controller'
 import { changePasswordAuth } from '../../services/middleware/auth.middleware'
+import { authLimiter } from '../../config/rateLimiter'
 
 const authRouter = Router()
+
+authRouter.use(authLimiter)
 
 authRouter.post('/register', registerUserController)
 authRouter.post('/login', loginUserController)

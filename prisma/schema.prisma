@@ -32,24 +32,46 @@ enum AccountType {
   SYSTEM_BANK
 }
 
+enum Currency {
+  NGN
+}
+
+enum Provider {
+  FLUTTERWAVE
+}
+
+enum WebhookStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REVERSED
+}
+
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
+  id             String        @id @default(cuid())
+  email          String        @unique
   firstName      String?
   lastName       String?
   displayName    String
   password       String
-  role           Role     @default(USER)
+  role           Role          @default(USER)
   transactionPin String?
-  tier           Tier     @default(Tier1)
-  phone          String?  @unique
+  tier           Tier          @default(Tier1)
+  phone          String?       @unique
   bvnMasked      String?
   ninMasked      String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  accounts     Account[]
-  transactions Transaction[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  accounts       Account[]
+  transactions   Transaction[]
+  payments       Payment[]
 
   @@index([email, displayName])
   @@map("users")
@@ -86,7 +108,8 @@ model Transaction {
   user          User?         @relation(fields: [userId], references: [id])
   ledgerEntries LedgerEntry[]
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  payments  Payment[]
 }
 
 model LedgerEntry {
@@ -105,4 +128,48 @@ model LedgerEntry {
   destAccount   Account @relation("DestLedger", fields: [destAccountId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model Payment {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  amount   Decimal
+  currency Currency @default(NGN)
+
+  provider    Provider @default(FLUTTERWAVE)
+  providerRef String?
+  reference   String   @unique // YOUR internal reference
+
+  status PaymentStatus @default(PENDING)
+
+  description String?
+
+  transactionId String?
+  transaction   Transaction? @relation(fields: [transactionId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([provider, providerRef])
+}
+
+model WebhookLog {
+  id String @id @default(uuid())
+
+  provider   String
+  externalId String
+
+  payload Json?
+
+  status WebhookStatus @default(PENDING)
+  error  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([provider, externalId])
 }

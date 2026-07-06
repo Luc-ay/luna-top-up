@@ -102,11 +102,7 @@ export async function loginService(data: LoginInput): Promise<LoginResponse> {
 	console.log('Check redis and deleted for active token')
 	await redisConnection.del(`access_token:${user.id}`)
 	console.log('Save active token to redis')
-	await redisConnection.setex(
-		`access_token:${user.id},`,
-		86400,
-		accessToken,
-	)
+	await redisConnection.setex(`access_token:${user.id}`, 86400, accessToken)
 
 	return {
 		message: 'User Login Successfully',

@@ -41,7 +41,7 @@ export const authenticateUser = async (
 		const decoded = verifyToken(token) as CustomJwtPayload
 
 		const activeToken = await redisConnection.get(
-			`access_token:${decoded.userId}`,
+			`access_token:${decoded.id}`,
 		)
 
 		if (!activeToken) {
