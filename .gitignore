@@ -4,4 +4,3 @@ node_modules
 .claude*
 /src/generated/prisma
 index.html*
-prisma/seed.ts

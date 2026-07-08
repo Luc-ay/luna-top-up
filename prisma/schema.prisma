@@ -173,3 +173,40 @@ model WebhookLog {
 
   @@index([provider, externalId])
 }
+
+model VtuCategory {
+  id          String  @id @default(cuid())
+  flwId       Int     @unique // The ID from FLW (e.g., 1, 2, 3)
+  name        String // e.g., "Airtime"
+  code        String  @unique // e.g., "AIRTIME"
+  description String?
+  isActive    Boolean @default(true) // Turn off entire categories (e.g., disable Tax payments)
+
+  billers VtuInfo[] // Relation to actual bill products
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("vtu_categories")
+}
+
+model VtuInfo {
+  id          String  @id @default(cuid())
+  flwId       Int     @unique // The ID from FLW (e.g., 1, 2, 3)
+  name        String // e.g., "MTN 1GB Data - 1 Day"
+  logo        String? // FLW item_code (e.g., "MD404" for specific data plan)
+  biller_code String // FLW biller_code (e.g., "BIL119" for MTN)
+  description String?
+  short_name  String? // e.g., "MTN 1GB"
+
+  isActive Boolean @default(true) // Easily toggle specific products off if the provider is down
+
+  categoryId String
+  category   VtuCategory @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId, isActive, flwId])
+  @@map("vtu_billers")
+}

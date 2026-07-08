@@ -9,6 +9,7 @@ import authRouter from './modules/auth/auth.route'
 import userRouter from './modules/userProfile/user.route'
 import { globalLimiter } from './config/rateLimiter'
 import paymentRouter from './modules/payments/payment.route'
+import vtuRouter from './modules/vtu/vtu.route'
 
 dotenv.config()
 
@@ -31,6 +32,7 @@ app.get('/ping', (req, res) => {
 app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/payment', paymentRouter)
+app.use('/api/vtu', vtuRouter)
 
 // Error Handler
 
