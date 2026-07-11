@@ -28,3 +28,13 @@ export const UpdatePasswordSchema = z.object({
 
 export type updateUserInput = z.infer<typeof UpdateUserSchema>
 export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>
+
+export const CreatePinSchema = z.object({
+	pin: z
+		.string({ message: 'PIN is required' })
+		.regex(/^\d{4}$/, 'PIN must be exactly 4 digits'),
+	password: z.string({ message: 'Password is required' }),
+})
+
+export type CreatePinInput = z.infer<typeof CreatePinSchema>
+

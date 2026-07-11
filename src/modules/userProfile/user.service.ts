@@ -7,7 +7,7 @@ import {
 	NOT_FOUND,
 	UNAUTHORIZED,
 } from '../../services/shared/http'
-import { UpdatePasswordInput, updateUserInput } from './user.types'
+import { UpdatePasswordInput, updateUserInput, CreatePinInput } from './user.types'
 import { Prisma } from '@prisma/client'
 
 export async function updateUserService(data: updateUserInput, userId: string) {
@@ -129,4 +129,29 @@ export async function getUserService(userId: string) {
 	}
 
 	return userInfo
+}
+
+export async function createUserPinService(data: CreatePinInput, userId: string) {
+	const user = await prisma.user.findUnique({
+		where: { id: userId },
+		select: { password: true },
+	})
+
+	if (!user) {
+		throw new AppError('User not found', NOT_FOUND)
+	}
+
+	const isPasswordValid = await bcrypt.compare(data.password, user.password)
+	if (!isPasswordValid) {
+		throw new AppError('Incorrect account password', UNAUTHORIZED)
+	}
+
+	const hashedPin = await bcrypt.hash(data.pin, 10)
+
+	await prisma.user.update({
+		where: { id: userId },
+		data: { transactionPin: hashedPin },
+	})
+
+	return 'Transaction PIN configured successfully'
 }

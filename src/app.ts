@@ -10,6 +10,8 @@ import userRouter from './modules/userProfile/user.route'
 import { globalLimiter } from './config/rateLimiter'
 import paymentRouter from './modules/payments/payment.route'
 import vtuRouter from './modules/vtu/vtu.route'
+import transactionRouter from './modules/transaction/transaction.route'
+import walletRouter from './modules/wallet/wallet.route'
 
 dotenv.config()
 
@@ -18,7 +20,21 @@ const app = express()
 // Middleware
 app.set('trust proxy', 1)
 app.use(morgan('dev'))
-app.use(cors())
+app.use(cors({
+	origin: '*',
+	methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+	allowedHeaders: [
+		'Content-Type',
+		'Authorization',
+		'verif-hash',
+		'x-flutterwave-signature',
+		'x-flutterwave-event',
+		'x-flutterwave-timestamp',
+		'x-flutterwave-idempotency-key',
+		'x-flutterwave-signature-256',
+		'x-flutterwave-signature-512',
+	],
+}))
 app.use(helmet())
 app.use(express.json())
 app.use(globalLimiter)
@@ -33,6 +49,8 @@ app.use('/api/auth', authRouter)
 app.use('/api/user', userRouter)
 app.use('/api/payment', paymentRouter)
 app.use('/api/vtu', vtuRouter)
+app.use('/api/transaction', transactionRouter)
+app.use('/api/wallet', walletRouter)
 
 // Error Handler
 

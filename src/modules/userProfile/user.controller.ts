@@ -2,10 +2,11 @@ import asyncHandler from '../../services/shared/catchError'
 import { OK } from '../../services/shared/http'
 import {
 	changeUserPasswordService,
+	createUserPinService,
 	getUserService,
 	updateUserService,
 } from './user.service'
-import { UpdatePasswordSchema, UpdateUserSchema } from './user.types'
+import { CreatePinSchema, UpdatePasswordSchema, UpdateUserSchema } from './user.types'
 
 export const updateUserController = asyncHandler(async (req, res) => {
 	const userId = req.user?.id
@@ -18,14 +19,22 @@ export const updateUserController = asyncHandler(async (req, res) => {
 export const changeUserPasswordController = asyncHandler(async (req, res) => {
 	const userId = req.user?.id
 	const data = UpdatePasswordSchema.parse(req.body)
-	const result = changeUserPasswordService(data, userId)
+	const result = await changeUserPasswordService(data, userId)
 
 	return res.status(OK).json(result)
 })
 
 export const getUserController = asyncHandler(async (req, res) => {
 	const userId = req.user?.id
-	const result = getUserService(userId)
+	const result = await getUserService(userId)
+
+	return res.status(OK).json(result)
+})
+
+export const createUserPinController = asyncHandler(async (req, res) => {
+	const userId = req.user?.id
+	const data = CreatePinSchema.parse(req.body)
+	const result = await createUserPinService(data, userId)
 
 	return res.status(OK).json(result)
 })

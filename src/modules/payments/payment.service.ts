@@ -14,6 +14,7 @@ import {
 	markWebhookProcessed,
 } from '../../services/shared/webhookIdempotency'
 import { PaymentStatus } from '@prisma/client'
+import { dispatchDepositEmail } from '../../services/shared/queues'
 
 // const reference = `Luna-${Date.now()}-${Math.floor(100000 + Math.random() * 900000)}`
 
@@ -110,6 +111,11 @@ export async function handleFlutterwaveWebhook(
 			userId: true,
 			amount: true,
 			transactionId: true,
+			user: {
+				select: {
+					email: true,
+				},
+			},
 		},
 	})
 
@@ -137,8 +143,13 @@ export async function handleFlutterwaveWebhook(
 		const userWalletAccount = await tx.account.findFirst({
 			where: {
 				userId: existingPayment.userId,
-				name: 'Main Wallet',
+				OR: [
+					{ name: 'Main Wallet' },
+					{ name: 'Main wallet' },
+				],
 			},
+		}) || await tx.account.findFirst({
+			where: { userId: existingPayment.userId },
 		})
 
 		if (!systemGatewayAccount || !userWalletAccount) {
@@ -192,6 +203,14 @@ export async function handleFlutterwaveWebhook(
 	})
 
 	await markWebhookProcessed('flutterwave', externalId)
+
+	if (existingPayment.user?.email) {
+		dispatchDepositEmail(
+			existingPayment.user.email,
+			Number(existingPayment.amount),
+			tx_ref
+		).catch((err) => console.error('Error dispatching deposit email job:', err))
+	}
 
 	console.log('Payment successfully processed:', tx_ref)
 	return { status: 'processed' }

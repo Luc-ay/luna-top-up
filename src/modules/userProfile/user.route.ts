@@ -1,6 +1,7 @@
 import { Router } from 'express'
 import {
 	changeUserPasswordController,
+	createUserPinController,
 	getUserController,
 	updateUserController,
 } from './user.controller'
@@ -10,6 +11,7 @@ const userRouter = Router()
 
 userRouter.get('/', authenticateUser, getUserController)
 userRouter.patch('/', authenticateUser, updateUserController)
-userRouter.patch('/', authenticateUser, changeUserPasswordController)
+userRouter.patch('/password', authenticateUser, changeUserPasswordController)
+userRouter.post('/pin', authenticateUser, createUserPinController)
 
 export default userRouter

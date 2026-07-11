@@ -114,3 +114,172 @@ export async function resetPasswordCode(
 		return { success: false, error: message }
 	}
 }
+
+export async function sendDepositEmail(
+	email: string,
+	amount: number,
+	reference: string
+): Promise<SendEmailResponse> {
+	try {
+		const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #2e7d32;">Deposit Successful! 🎉</h2>
+                <p>Hello,</p>
+                <p>Your wallet has been successfully funded with <strong>₦${amount.toLocaleString()}</strong>.</p>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Transaction Reference:</strong> ${reference}</p>
+                    <p style="margin: 5px 0;"><strong>Amount Credited:</strong> ₦${amount.toLocaleString()}</p>
+                    <p style="margin: 5px 0;"><strong>Status:</strong> Successful</p>
+                </div>
+                <p>You can now use your wallet balance to purchase airtime, data bundles, and pay other utility bills.</p>
+                <p>Thank you for choosing ${APP_NAME}.</p>
+                <br>
+                <p>Best regards,</p>
+                <p><strong>The ${APP_NAME} Team</strong></p>
+            </div>
+        `
+
+		const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'api-key': BREVO_API_KEY as string,
+			},
+			body: JSON.stringify({
+				sender: {
+					email: EMAIL_FROM as string,
+					name: APP_NAME,
+				},
+				to: [{ email }],
+				subject: `Wallet Funded: ₦${amount.toLocaleString()}! 💳`,
+				htmlContent,
+			}),
+		})
+
+		if (!response.ok) {
+			const errorData: unknown = await response.json()
+			throw new AppError(JSON.stringify(errorData), response.status)
+		}
+
+		return { success: true }
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error occurred'
+		console.error('Error sending deposit email:', message)
+		return { success: false, error: message }
+	}
+}
+
+export async function sendPurchaseEmail(
+	email: string,
+	serviceType: string,
+	phoneNumber: string,
+	amount: number,
+	reference: string
+): Promise<SendEmailResponse> {
+	try {
+		const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #1976d2;">Purchase Successful! 🛒</h2>
+                <p>Hello,</p>
+                <p>Your purchase of <strong>${serviceType.toUpperCase()}</strong> has been completed successfully.</p>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Product:</strong> ${serviceType.toUpperCase()}</p>
+                    <p style="margin: 5px 0;"><strong>Recipient Number:</strong> ${phoneNumber}</p>
+                    <p style="margin: 5px 0;"><strong>Amount Charged:</strong> ₦${amount.toLocaleString()}</p>
+                    <p style="margin: 5px 0;"><strong>Reference:</strong> ${reference}</p>
+                </div>
+                <p>The top-up has been sent to the recipient. Thank you for using ${APP_NAME}!</p>
+                <br>
+                <p>Best regards,</p>
+                <p><strong>The ${APP_NAME} Team</strong></p>
+            </div>
+        `
+
+		const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'api-key': BREVO_API_KEY as string,
+			},
+			body: JSON.stringify({
+				sender: {
+					email: EMAIL_FROM as string,
+					name: APP_NAME,
+				},
+				to: [{ email }],
+				subject: `${serviceType.toUpperCase()} Purchase Successful! 📱`,
+				htmlContent,
+			}),
+		})
+
+		if (!response.ok) {
+			const errorData: unknown = await response.json()
+			throw new AppError(JSON.stringify(errorData), response.status)
+		}
+
+		return { success: true }
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error occurred'
+		console.error('Error sending purchase email:', message)
+		return { success: false, error: message }
+	}
+}
+
+export async function sendRefundEmail(
+	email: string,
+	serviceType: string,
+	phoneNumber: string,
+	amount: number,
+	reference: string,
+	reason?: string
+): Promise<SendEmailResponse> {
+	try {
+		const htmlContent = `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333; line-height: 1.6; border: 1px solid #eee; padding: 20px; border-radius: 8px;">
+                <h2 style="color: #d32f2f;">Purchase Failed & Refunded 🔄</h2>
+                <p>Hello,</p>
+                <p>We are writing to let you know that your purchase of <strong>${serviceType.toUpperCase()}</strong> for <strong>${phoneNumber}</strong> could not be completed by the service provider.</p>
+                <p>As a result, your wallet has been fully refunded with <strong>₦${amount.toLocaleString()}</strong>.</p>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 15px 0;">
+                    <p style="margin: 5px 0;"><strong>Failed Product:</strong> ${serviceType.toUpperCase()}</p>
+                    <p style="margin: 5px 0;"><strong>Target Number:</strong> ${phoneNumber}</p>
+                    <p style="margin: 5px 0;"><strong>Refunded Amount:</strong> ₦${amount.toLocaleString()}</p>
+                    <p style="margin: 5px 0;"><strong>Reference:</strong> ${reference}</p>
+                    ${reason ? `<p style="margin: 5px 0;"><strong>Reason:</strong> ${reason}</p>` : ''}
+                </div>
+                <p>Your new balance is updated and available for use immediately. We apologize for the inconvenience.</p>
+                <br>
+                <p>Best regards,</p>
+                <p><strong>The ${APP_NAME} Team</strong></p>
+            </div>
+        `
+
+		const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'api-key': BREVO_API_KEY as string,
+			},
+			body: JSON.stringify({
+				sender: {
+					email: EMAIL_FROM as string,
+					name: APP_NAME,
+				},
+				to: [{ email }],
+				subject: `Refund Processed: ₦${amount.toLocaleString()} 🔄`,
+				htmlContent,
+			}),
+		})
+
+		if (!response.ok) {
+			const errorData: unknown = await response.json()
+			throw new AppError(JSON.stringify(errorData), response.status)
+		}
+
+		return { success: true }
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error occurred'
+		console.error('Error sending refund email:', message)
+		return { success: false, error: message }
+	}
+}
