@@ -12,6 +12,8 @@ import paymentRouter from './modules/payments/payment.route'
 import vtuRouter from './modules/vtu/vtu.route'
 import transactionRouter from './modules/transaction/transaction.route'
 import walletRouter from './modules/wallet/wallet.route'
+import swaggerUi from 'swagger-ui-express'
+import { swaggerSpec } from './config/swagger'
 
 dotenv.config()
 
@@ -51,6 +53,7 @@ app.use('/api/payment', paymentRouter)
 app.use('/api/vtu', vtuRouter)
 app.use('/api/transaction', transactionRouter)
 app.use('/api/wallet', walletRouter)
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Error Handler
 

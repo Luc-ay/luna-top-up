@@ -3,6 +3,8 @@ import rateLimit from 'express-rate-limit'
 export const globalLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000,
 	limit: 500,
+	// Exempt payment webhook endpoint from rate limiting to prevent blocking payment gateway callbacks
+	skip: (req) => req.originalUrl === '/api/payment/webhook',
 })
 
 export const authLimiter = rateLimit({
